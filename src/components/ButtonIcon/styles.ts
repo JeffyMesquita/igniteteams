@@ -6,6 +6,7 @@ export type ButtonIconType = 'PRIMARY' | 'SECONDARY';
 
 interface ButtonIconStyleProps {
   type: ButtonIconType;
+  size?: number;
 }
 
 export const Container = styled(TouchableOpacity)`
@@ -19,8 +20,8 @@ export const Container = styled(TouchableOpacity)`
 `;
 
 export const Icon = styled(MaterialIcons).attrs<ButtonIconStyleProps>(
-  ({ theme, type }) => ({
-    size: 24,
+  ({ theme, type, size }) => ({
+    size,
     color: type === 'PRIMARY' ? theme.COLORS.GREEN_700 : theme.COLORS.RED,
   })
 )``;
