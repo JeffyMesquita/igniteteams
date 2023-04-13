@@ -1,3 +1,4 @@
+import { useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import { FlatList } from 'react-native';
 import { Container, Form, HeaderList, NumberOfPlayers } from './styles';
@@ -12,6 +13,7 @@ import { ListEmpty } from '@components/ListEmpty';
 import { Button } from '@components/Button';
 
 export function Players() {
+  const route = useRoute();
   const [team, setTeam] = useState('Time A');
   const [players, setPlayers] = useState([
     // 'Anyone',
@@ -26,12 +28,14 @@ export function Players() {
     // 'José',
   ]);
 
+  const { group } = route.params as { group: string };
+
   return (
     <Container>
       <Header showBackButton />
 
       <Highlight
-        title="Group Name"
+        title={group}
         subTitle="Add the peoples and separate the teams"
       />
 
