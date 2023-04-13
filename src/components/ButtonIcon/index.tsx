@@ -13,6 +13,7 @@ export function ButtonIcon({ type = 'PRIMARY', icon, size = 24, ...rest }: Butto
   return (
     <Container 
       {...rest}
+      activeOpacity={0.7}
     >
       <Icon name={icon} type={type} size={size}/>
     </Container>
