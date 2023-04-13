@@ -8,10 +8,23 @@ import { ButtonIcon } from '@components/ButtonIcon';
 import { Input } from '@components/Input';
 import { Filter } from '@components/Filter';
 import { PlayerCard } from '@components/PlayerCard';
+import { ListEmpty } from '@components/ListEmpty';
+import { Button } from '@components/Button';
 
 export function Players() {
   const [team, setTeam] = useState('Time A');
-  const [players, setPlayers] = useState(['Anyone', 'Doe', 'John', 'Mary']);
+  const [players, setPlayers] = useState([
+    // 'Anyone',
+    // 'Doe',
+    // 'John',
+    // 'Mary',
+    // 'David',
+    // 'Tom',
+    // 'Ricardo',
+    // 'Maria',
+    // 'João',
+    // 'José',
+  ]);
 
   return (
     <Container>
@@ -51,6 +64,18 @@ export function Players() {
           <PlayerCard name={item} onRemove={() => {}} />
         )}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={() => (
+          <ListEmpty message="Não há pessoas nesse time." />
+        )}
+        contentContainerStyle={[
+          { paddingBottom: 100 },
+          players.length === 0 && { flex: 1 },
+        ]}
+      />
+
+      <Button
+        title="Remove Team"
+        type='SECONDARY'
       />
     </Container>
   );
