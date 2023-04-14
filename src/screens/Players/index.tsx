@@ -1,7 +1,7 @@
 import { playersGetByGroupAndTeam } from '@storage/player/playerGetByGroupAndTeam';
 import { playerAddByGroup } from '@storage/player/playerAddByGroup';
 import { useRoute } from '@react-navigation/native';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Alert, FlatList } from 'react-native';
 import { Container, Form, HeaderList, NumberOfPlayers } from './styles';
 
@@ -20,7 +20,9 @@ export function Players() {
   const route = useRoute();
   const [newPlayerName, setNewPlayerName] = useState('');
   const [team, setTeam] = useState('Time A');
-  const [players, setPlayers] = useState<PlayerStorageDTO[]>([] as PlayerStorageDTO[]);
+  const [players, setPlayers] = useState<PlayerStorageDTO[]>(
+    [] as PlayerStorageDTO[]
+  );
 
   const { group } = route.params as { group: string };
 
@@ -36,7 +38,7 @@ export function Players() {
 
     try {
       await playerAddByGroup(newPlayer, group);
-      
+      fetchPlayersByTeam();
 
       Alert.alert(
         'New player',
@@ -58,7 +60,6 @@ export function Players() {
     try {
       const playersByTeam = await playersGetByGroupAndTeam(group, team);
       setPlayers(playersByTeam);
-
     } catch (error) {
       console.log(error);
       Alert.alert(
@@ -67,6 +68,10 @@ export function Players() {
       );
     }
   }
+
+  useEffect(() => {
+    fetchPlayersByTeam();
+  }, [team]);
 
   return (
     <Container>
@@ -89,7 +94,7 @@ export function Players() {
 
       <HeaderList>
         <FlatList
-          data={['Team A', 'Team B', 'Team C', 'Team D']}
+          data={['Team A', 'Team B']}
           keyExtractor={(item) => String(item)}
           renderItem={({ item }) => (
             <Filter
@@ -106,9 +111,9 @@ export function Players() {
 
       <FlatList
         data={players}
-        keyExtractor={(item) => item}
+        keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
-          <PlayerCard name={item} onRemove={() => {}} />
+          <PlayerCard name={item.name} onRemove={() => {}} />
         )}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={() => (
