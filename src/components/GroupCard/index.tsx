@@ -7,7 +7,7 @@ interface GroupCardProps extends TouchableOpacityProps {
 
 export function GroupCard({ title, ...rest }: GroupCardProps) {
   return (
-    <Container {...rest}>
+    <Container activeOpacity={.5} {...rest}>
       <Icon />
       <Title>{title}</Title>
     </Container>
