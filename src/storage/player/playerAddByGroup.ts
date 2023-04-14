@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppError } from '@utils/AppError';
 
 import { PLAYER_COLLECTION } from '@storage/storageConfig';
+import { playersGetByGroup } from './playersGetByGroup';
 import { PlayerStorageDTO } from './PlayerStorageDTO';
 
 export async function playerAddByGroup(
@@ -9,9 +10,20 @@ export async function playerAddByGroup(
   group: string
 ) {
   try {
-    
-    await AsyncStorage.setItem(`${PLAYER_COLLECTION}-${group}`, '');
+    const storedPlayers = await playersGetByGroup(group);
+
+    const playerAlreadyExists =
+      storedPlayers.filter((player) => player.name === newPlayer.name).length >
+      0;
+
+    if (playerAlreadyExists) {
+      throw new AppError('This person is already in the group');
+    }
+
+    const storage = JSON.stringify([...storedPlayers, newPlayer]);
+
+    await AsyncStorage.setItem(`${PLAYER_COLLECTION}-${group}`, storage);
   } catch (error) {
-    throw new AppError('Não foi possível salvar o jogador');
+    throw new AppError('This person is already in the group');
   }
 }
