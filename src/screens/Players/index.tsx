@@ -1,8 +1,8 @@
 import { playersGetByGroupAndTeam } from '@storage/player/playerGetByGroupAndTeam';
 import { playerAddByGroup } from '@storage/player/playerAddByGroup';
 import { useRoute } from '@react-navigation/native';
-import { useState, useEffect } from 'react';
-import { Alert, FlatList } from 'react-native';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Alert, FlatList, TextInput, Keyboard } from 'react-native';
 import { Container, Form, HeaderList, NumberOfPlayers } from './styles';
 
 import { Header } from '@components/Header';
@@ -19,14 +19,15 @@ import { PlayerStorageDTO } from '@storage/player/PlayerStorageDTO';
 export function Players() {
   const route = useRoute();
   const [newPlayerName, setNewPlayerName] = useState('');
-  const [team, setTeam] = useState('Time A');
+  const [team, setTeam] = useState('Team A');
   const [players, setPlayers] = useState<PlayerStorageDTO[]>(
     [] as PlayerStorageDTO[]
   );
+  const newPlayerNameInputRef = useRef<TextInput>(null);
 
   const { group } = route.params as { group: string };
 
-  async function handleAddPlayer() {
+  const handleAddPlayer = useCallback(async () => {
     if (newPlayerName.trim().length === 0) {
       return Alert.alert('New player', 'Please, enter a player name.');
     }
@@ -38,14 +39,16 @@ export function Players() {
 
     try {
       await playerAddByGroup(newPlayer, group);
-      fetchPlayersByTeam();
-
+      
       Alert.alert(
         'New player',
         `Player ${newPlayer.name} added successfully on the team ${newPlayer.team}.`
-      );
-
+        );
+        
+      newPlayerNameInputRef.current?.blur();
+      Keyboard.dismiss();
       setNewPlayerName('');
+      fetchPlayersByTeam();
     } catch (error) {
       if (error instanceof AppError) {
         Alert.alert('New player', error.message);
@@ -54,9 +57,9 @@ export function Players() {
         Alert.alert('New player', 'Something went wrong. Try again.');
       }
     }
-  }
+  }, [newPlayerName, group, AppError]);
 
-  async function fetchPlayersByTeam() {
+  const fetchPlayersByTeam = useCallback(async () => {
     try {
       const playersByTeam = await playersGetByGroupAndTeam(group, team);
       setPlayers(playersByTeam);
@@ -67,7 +70,7 @@ export function Players() {
         'Something went wrong, it was not possible to load the people of the selected team. Try again.'
       );
     }
-  }
+  }, [group, team]);
 
   useEffect(() => {
     fetchPlayersByTeam();
@@ -88,6 +91,9 @@ export function Players() {
           value={newPlayerName}
           placeholder="Player Name"
           autoCorrect={false}
+          inputRef={newPlayerNameInputRef}
+          onSubmitEditing={handleAddPlayer}
+          returnKeyType="done"
         />
         <ButtonIcon icon="add" size={30} onPress={handleAddPlayer} />
       </Form>
