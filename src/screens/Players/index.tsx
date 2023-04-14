@@ -1,5 +1,5 @@
+import { playersGetByGroupAndTeam } from '@storage/player/playerGetByGroupAndTeam';
 import { playerAddByGroup } from '@storage/player/playerAddByGroup';
-import { playersGetByGroup } from '@storage/player/playersGetByGroup';
 import { useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import { Alert, FlatList } from 'react-native';
@@ -14,12 +14,13 @@ import { PlayerCard } from '@components/PlayerCard';
 import { ListEmpty } from '@components/ListEmpty';
 import { Button } from '@components/Button';
 import { AppError } from '@utils/AppError';
+import { PlayerStorageDTO } from '@storage/player/PlayerStorageDTO';
 
 export function Players() {
   const route = useRoute();
   const [newPlayerName, setNewPlayerName] = useState('');
   const [team, setTeam] = useState('Time A');
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState<PlayerStorageDTO[]>([] as PlayerStorageDTO[]);
 
   const { group } = route.params as { group: string };
 
@@ -35,8 +36,7 @@ export function Players() {
 
     try {
       await playerAddByGroup(newPlayer, group);
-      const players = await playersGetByGroup(group);
-      console.log(players);
+      
 
       Alert.alert(
         'New player',
@@ -51,6 +51,20 @@ export function Players() {
         console.log(error);
         Alert.alert('New player', 'Something went wrong. Try again.');
       }
+    }
+  }
+
+  async function fetchPlayersByTeam() {
+    try {
+      const playersByTeam = await playersGetByGroupAndTeam(group, team);
+      setPlayers(playersByTeam);
+
+    } catch (error) {
+      console.log(error);
+      Alert.alert(
+        'Players',
+        'Something went wrong, it was not possible to load the people of the selected team. Try again.'
+      );
     }
   }
 
