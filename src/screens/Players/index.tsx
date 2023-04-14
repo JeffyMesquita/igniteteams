@@ -73,13 +73,14 @@ export function Players() {
           selectedTeam
         );
         setPlayers(playersByTeam);
-        setIsLoading(false);
       } catch (error) {
         console.log(error);
         Alert.alert(
           'Players',
           'Something went wrong, it was not possible to load the people of the selected team. Try again.'
         );
+      } finally {
+        setIsLoading(false);
       }
     },
     [group, setIsLoading]
