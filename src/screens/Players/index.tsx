@@ -1,7 +1,8 @@
 import { playersGetByGroupAndTeam } from '@storage/player/playerGetByGroupAndTeam';
 import { playerAddByGroup } from '@storage/player/playerAddByGroup';
 import { playerRemoveByGroup } from '@storage/player/playerRemoveByGroup';
-import { useRoute } from '@react-navigation/native';
+import { groupRemoveByName } from '@storage/group/groupRemoveByName';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert, FlatList, TextInput, Keyboard } from 'react-native';
 import { Container, Form, HeaderList, NumberOfPlayers } from './styles';
@@ -27,6 +28,7 @@ export function Players() {
   const newPlayerNameInputRef = useRef<TextInput>(null);
 
   const { group } = route.params as { group: string };
+  const navigation = useNavigation();
 
   const handleAddPlayer = useCallback(async () => {
     if (newPlayerName.trim().length === 0) {
@@ -97,6 +99,38 @@ export function Players() {
     [group, team]
   );
 
+  const removeGroup = useCallback(async () => {
+    try {
+      await groupRemoveByName(group);
+
+      Alert.alert('Remove group', `The group ${group} was removed.`);
+      navigation.navigate('groups');
+    } catch (error) {
+      console.log(error);
+      Alert.alert(
+        'Remove group',
+        'Something went wrong, it was not possible to remove the group. Try again.'
+      );
+    }
+  }, [group]);
+
+  const handleGroupRemove = useCallback(async () => {
+    Alert.alert(
+      'Remove group',
+      `Are you sure you want to remove the group '${group.toLocaleUpperCase()} '?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes, remove',
+          onPress: () => removeGroup(),
+        },
+      ]
+    );
+  }, [removeGroup]);
+
   useEffect(() => {
     fetchPlayersByTeam(team);
   }, [team]);
@@ -161,7 +195,11 @@ export function Players() {
         ]}
       />
 
-      <Button title="Remove Team" type="SECONDARY" />
+      <Button
+        title="Remove Team"
+        type="SECONDARY"
+        onPress={handleGroupRemove}
+      />
     </Container>
   );
 }
