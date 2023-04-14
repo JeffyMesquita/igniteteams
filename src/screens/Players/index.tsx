@@ -1,5 +1,6 @@
 import { playersGetByGroupAndTeam } from '@storage/player/playerGetByGroupAndTeam';
 import { playerAddByGroup } from '@storage/player/playerAddByGroup';
+import { playerRemoveByGroup } from '@storage/player/playerRemoveByGroup';
 import { useRoute } from '@react-navigation/native';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert, FlatList, TextInput, Keyboard } from 'react-native';
@@ -39,16 +40,16 @@ export function Players() {
 
     try {
       await playerAddByGroup(newPlayer, group);
-      
+
       Alert.alert(
         'New player',
         `Player ${newPlayer.name} added successfully on the team ${newPlayer.team}.`
-        );
-        
+      );
+
       newPlayerNameInputRef.current?.blur();
       Keyboard.dismiss();
       setNewPlayerName('');
-      fetchPlayersByTeam();
+      fetchPlayersByTeam(team);
     } catch (error) {
       if (error instanceof AppError) {
         Alert.alert('New player', error.message);
@@ -57,23 +58,47 @@ export function Players() {
         Alert.alert('New player', 'Something went wrong. Try again.');
       }
     }
-  }, [newPlayerName, group, AppError]);
+  }, [newPlayerName, group, team, AppError]);
 
-  const fetchPlayersByTeam = useCallback(async () => {
-    try {
-      const playersByTeam = await playersGetByGroupAndTeam(group, team);
-      setPlayers(playersByTeam);
-    } catch (error) {
-      console.log(error);
-      Alert.alert(
-        'Players',
-        'Something went wrong, it was not possible to load the people of the selected team. Try again.'
-      );
-    }
-  }, [group, team]);
+  const fetchPlayersByTeam = useCallback(
+    async (selectedTeam: string) => {
+      try {
+        const playersByTeam = await playersGetByGroupAndTeam(
+          group,
+          selectedTeam
+        );
+        setPlayers(playersByTeam);
+      } catch (error) {
+        console.log(error);
+        Alert.alert(
+          'Players',
+          'Something went wrong, it was not possible to load the people of the selected team. Try again.'
+        );
+      }
+    },
+    [group]
+  );
+
+  const handlePlayerRemove = useCallback(
+    async (playerName: string) => {
+      try {
+        await playerRemoveByGroup(playerName, group);
+
+        Alert.alert('Remove player', `The player ${playerName} was removed.`);
+        await fetchPlayersByTeam(team);
+      } catch (error) {
+        console.log(error);
+        Alert.alert(
+          'Remove player',
+          'Something went wrong, it was not possible to remove the player. Try again.'
+        );
+      }
+    },
+    [group, team]
+  );
 
   useEffect(() => {
-    fetchPlayersByTeam();
+    fetchPlayersByTeam(team);
   }, [team]);
 
   return (
@@ -119,7 +144,12 @@ export function Players() {
         data={players}
         keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
-          <PlayerCard name={item.name} onRemove={() => {}} />
+          <PlayerCard
+            name={item.name}
+            onRemove={() => {
+              handlePlayerRemove(item.name);
+            }}
+          />
         )}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={() => (
