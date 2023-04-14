@@ -17,18 +17,18 @@ export function NewGroup() {
   async function handleNew() {
     try {
       if (group.trim().length === 0) {
-        return  Alert.alert('New Group','Group name is required');
+        return  Alert.alert('New Class','Class name is required');
       }
 
       await groupCreate(group);
       navigation.navigate('players', { group });
     } catch (error) {
       if (error instanceof AppError) {
-        Alert.alert('New Group', error.message);
+        Alert.alert('New Class', error.message);
         return;
       }
 
-      Alert.alert('New Group', 'An error occurred, try again later');
+      Alert.alert('New Class', 'An error occurred, try again later');
       console.log(error);
     }
   }
@@ -41,14 +41,14 @@ export function NewGroup() {
         <Icon />
 
         <Highlight
-          title="New Group"
-          subTitle="Create a group to play with your friends"
+          title="New Class"
+          subTitle="Create a class to play with your friends"
         />
 
-        <Input placeholder="Group name" onChangeText={setGroup} />
+        <Input placeholder="Class name" onChangeText={setGroup} />
 
         <Button
-          title="Create Group"
+          title="Create Class"
           style={{
             marginTop: 20,
           }}
